@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<title>Используем jQuery и JSON в месте с Google Maps API v3 - пример 3</title>
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+
+<script type="text/javascript">
+
+	var map;
+	var arrMarkers = [];
+	var arrInfoWindows = [];
+	
+
+	function mapInit(){
+
+		// выводим простую карту
+	   map = new google.maps.Map(document.getElementById('map'), {
+	    center: {lat: 46.46720929, lng: 30.7430613},
+	    zoom: 15
+	  });
+
+		
+
+		//Определяем область отображения меток на карте
+		var latlngbounds = new google.maps.LatLngBounds();
+
+
+		//обьявляем переменную кот открывает инф. окно
+  		var infoWindow1 = new google.maps.InfoWindow;
+		
+		 //  HTML5 geolocation. - определение наших координат
+		if (navigator.geolocation) {
+		    navigator.geolocation.getCurrentPosition(function(position) {
+		       var point = new google.maps.LatLng(position.coords.latitude, 
+		                                          position.coords.longitude);
+				// Place a marker
+			      new google.maps.Marker({
+			        position: point,
+			        map: map,
+			        title: 'MY Location.'
+			      });
+			     
+			    map.setCenter(point);
+	        	infoWindow1.setPosition(point);
+	   			infoWindow1.setContent('MY Location.');
+     
+		    },
+		    function() {
+		      handleLocationError(true, infoWindow, map.getCenter());
+		    });
+		 }
+
+
+		//Загружаем данные в формате JSON из файла map.json
+
+		$.getJSON("map.json", {}, function(data){
+
+			$.each(data.places, function(i, item){
+
+				$("#markers").append('<li><a href="#" rel="' + i + '">' + item.title + '</a></li>');
+
+			
+				var marker = new google.maps.Marker({
+					position: new google.maps.LatLng(item.lat, item.lng),
+					map: map,
+					title: item.title
+				});
+
+				
+				//Добавляем координаты меток
+				latlngbounds.extend(new google.maps.LatLng(item.lat, item.lng));
+
+				arrMarkers[i] = marker;
+
+				var infowindow = new google.maps.InfoWindow({
+
+					content: "<h3>"+ item.title +"</h3><p>"+ item.description +"</p>"
+
+				});
+
+				arrInfoWindows[i] = infowindow;
+
+                google.maps.event.addListener(map, 'click', function() {
+                     infoWindow.close();
+                });
+                
+				google.maps.event.addListener(marker, 'click', function() {
+
+					infowindow.open(map, marker);
+
+				});
+
+
+
+			});
+			
+			//Центрируем и масштабируем карту так, чтобы были видны все метки
+			map.setCenter( latlngbounds.getCenter(), map.fitBounds(latlngbounds));
+
+		});
+
+	}
+
+	$(function(){
+
+		//Определяем карту (добавляем маркеры, балуны и список со ссылками)
+
+		mapInit();
+
+		
+
+		// "live" отслеживает событие клика по ссылке
+
+		$("#markers a").live("click", function(){
+
+			var i = $(this).attr("rel");
+
+			// Эта строка кода, закрывает все открытые балуны, для открытия выбранного
+
+			for(x=0; x < arrInfoWindows.length; x++){ arrInfoWindows[x].close(); }
+
+			arrInfoWindows[i].open(map, arrMarkers[i]);
+
+		});
+
+	});
+
+</script>
+
+<style type="text/css" media="screen">
+
+	img { border: 0; }
+
+	#map{
+
+		width: 800px;
+
+		height: 500px; 
+
+	}
+
+	#content {
+
+		position: fixed;
+
+		top: 10px;
+
+		left: 800px;
+
+		margin: 30px;
+
+	}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="container">
+
+	<div id="header"></div>
+
+	<div id="map"></div>
+
+	<div id="content">	
+
+	<ul id="markers"></ul>
+
+	</div>
+
+</div>
+
+</body>
+
+</html>
