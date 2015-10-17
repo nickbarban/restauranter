@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Geolocation</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        height: 100%;
+      }
+    </style>
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+// Note: This example requires that you consent to location sharing when
+// prompted by your browser. If you see the error "The Geolocation service
+// failed.", it means you probably did not give permission for the browser to
+// locate you.
+
+function initMap() {
+
+  // выводим простую карту
+  var map = new google.maps.Map(document.getElementById('map'), {
+    center: {lat: 46.46720929, lng: 30.7430613},
+    zoom: 15
+  });
+
+  //обьявляем переменную кот открывает инф. окно
+  //var infoWindow = new google.maps.InfoWindow;
+
+
+  // Try HTML5 geolocation.
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+       var point = new google.maps.LatLng(position.coords.latitude, 
+                                          position.coords.longitude);
+      map.setCenter(point);
+      var infoWindow = new google.maps.InfoWindow
+      infoWindow.setPosition(point);
+      infoWindow.setContent('MY Location.');
+     
+       // Place a marker
+     var marker1 =  new google.maps.Marker({
+        position: point,
+        map: map,
+        title: 'MY Location.'
+      });
+
+      //  new google.maps.Marker({map: map, position: cairo});
+  marker1.addListener('click', function() {
+    infowindow.open(map, marker1);
+
+
+    }, function() {
+      handleLocationError(true, infoWindow, map.getCenter());
+
+   
+  });
+
+    });
+  } 
+}
+
+
+
+    </script>
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+     <script src="http://maps.google.com/maps/api/js?sensor=true" type="text/javascript"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCcSANu5x-DfJFakmfbivCd0dJQBuk47Ig&signed_in=true&callback=initMap"
+        async defer>
+    </script>
+  </body>
+</html>
